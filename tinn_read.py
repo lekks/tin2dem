@@ -59,7 +59,7 @@ class Surface:
                         surfaces += 1
                 elif event == "end": #at the start "text" field is undefined
                     if is_landxml_tag(elem.tag, "P"):
-                        coord = map(float, elem.text.split())
+                        coord = list(map(float, elem.text.split()))
                         if not swap:
                             coord[0], coord[1] = coord[1], coord[0]
                         self.add_vertex(int(elem.attrib["id"]), coord)

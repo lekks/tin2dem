@@ -63,5 +63,4 @@ def test_choose_face(test_surface):
     surface = Surface().from_collections(vertices, faces)
     dem = DemInfo.from_envelope(*bounds, pix_size=1, margins=0)
     result, debug = Render(surface).render_dem(dem)
-    assert map(list, debug) == expected
-    print result
+    assert list(map(list, debug)) == expected

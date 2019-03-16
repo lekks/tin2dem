@@ -159,13 +159,13 @@ def debug_render():
     faces = [(0, 1, 3), (3, 4, 1), (1, 2, 4), (2, 5, 4)]
     surface = Surface().from_collections(vertices, faces)
 
-    print Render.vertexes_as_ndarray(surface.vertices)
-    print Render.faces_as_ndarray(surface.faces)
+    print(Render.vertexes_as_ndarray(surface.vertices))
+    print(Render.faces_as_ndarray(surface.faces))
 
     dem = DemInfo([0.0, 1.0, 0.0, 4.0, 0.0, -1.0], 10, 10)
     result, debug = Render(surface).render_dem(dem)
-    print result
-    print debug
+    print(result)
+    print(debug)
 
 
 if __name__ == '__main__':
