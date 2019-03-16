@@ -17,7 +17,9 @@ CHUNK_HEIGHT = 256
 
 NO_DATA_VALUE = -32767
 
-def tin2dem(tinn_file, tiff_file, pix_size):
+def tin2dem(tinn_file, tiff_file, pix_size, espg):
+    if espg is None:
+        log.warn("NO ESPG GIVEN")
     log.info("Let`s read tinn {}".format(tinn_file))
     surface = Surface()
     surface.read_tin(tinn_file)
@@ -30,7 +32,7 @@ def tin2dem(tinn_file, tiff_file, pix_size):
     dem = DemInfo.from_envelope(*surface.get_envelope(), pix_size=pix_size)
     print (dem.gt)
     print ("Shift {}".format(shift))
-    tiff = GeoTiff(tiff_file, dem, NO_DATA_VALUE, shift)
+    tiff = GeoTiff(tiff_file, dem, NO_DATA_VALUE, shift, espg)
 
     chunks = list(split_dem(dem, CHUNK_WIDTH, CHUNK_WIDTH))
     for chunk in tqdm(chunks):
@@ -44,8 +46,9 @@ def main():
     parser.add_argument("tinn")
     parser.add_argument("tiff")
     parser.add_argument("--pixel", type=float, default=1.0)
+    parser.add_argument("--espg", type=int, default=None)
     args = parser.parse_args()
-    tin2dem(args.tinn, args.tiff, args.pixel)
+    tin2dem(args.tinn, args.tiff, args.pixel, args.espg)
 
 
 if __name__ == '__main__':
