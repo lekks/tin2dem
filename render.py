@@ -35,6 +35,9 @@ class Render:
         zcoef_vec = self.make_faces_zcoef(points_vec, faces_vec)
         self.zcoef_buf = cl.Buffer(self.ctx, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=zcoef_vec)
 
+        self.filter_buf = cl.Buffer(self.ctx, cl.mem_flags.READ_WRITE, self.faces_cnt * np.dtype(self.filter_type).itemsize)
+
+
     @staticmethod
     def make_faces_zcoef(points, faces):
         log.info("Calculating z coefficients")
@@ -59,15 +62,14 @@ class Render:
         bounds = dem_info.bbox()
         bounds_vec = np.array(tuple(bounds), dtype=pyopencl.cltypes.float4)
 
-        filter_buf = cl.Buffer(self.ctx, cl.mem_flags.READ_WRITE, self.faces_cnt * np.dtype(self.filter_type).itemsize)
-        cl.enqueue_fill_buffer(self.queue, filter_buf, self.filter_type(0), 0, self.faces_cnt * np.dtype(self.filter_type).itemsize)
+        cl.enqueue_fill_buffer(self.queue, self.filter_buf, self.filter_type(0), 0, self.faces_cnt * np.dtype(self.filter_type).itemsize)
 
         self.prg.filter(self.queue, (self.faces_cnt, 1), None,
                         bounds_vec, self.points,
                         self.faces, cl.cltypes.uint(self.faces_cnt),
-                        filter_buf)
+                        self.filter_buf)
 
-        return filter_buf
+        return self.filter_buf
 
     def _filter_buf_to_array(self, filter_buf):
         filter_vec = np.empty(self.faces_cnt, dtype=self.filter_type)
@@ -77,7 +79,7 @@ class Render:
     def render_dem(self, dem_info, filter_buf=None):
 
         if filter_buf is None:
-            filter_buf = cl.Buffer(self.ctx, cl.mem_flags.READ_WRITE, self.faces_cnt * np.dtype(self.filter_type).itemsize)
+            filter_buf = self.filter_buf
             cl.enqueue_fill_buffer(self.queue, filter_buf, self.filter_type(1), 0,
                                    self.faces_cnt * np.dtype(self.filter_type).itemsize)
 

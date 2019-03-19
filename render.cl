@@ -1,29 +1,29 @@
 
 //https://stackoverflow.com/questions/2049582/how-to-determine-if-a-point-is-in-a-2d-triangle
 //Naive implementation
-/*
-float vsign(float3 p1, float3 p2, float3 p3)
+
+inline float vsign(float3 p1, float3 p2, float3 p3)
 {
-    //TODO use vector and dot
-    return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
+    float3 p13=p1-p3;
+    float3 p23=p2-p3;
+    return p13.x * p23.y - p23.x * p13.y; //cross product didn`t give speed (
 }
 
 bool PointInTriangle(float3 pt, float3 v1, float3 v2, float3 v3)
 {
-    float d1, d2, d3;
-    bool has_neg, has_pos;
+    float d1 = vsign(pt, v1, v2);
+    float d2 = vsign(pt, v2, v3);
+    float d3 = vsign(pt, v3, v1);
 
-    d1 = vsign(pt, v1, v2);
-    d2 = vsign(pt, v2, v3);
-    d3 = vsign(pt, v3, v1);
-
-    has_neg = (d1 < 0) || (d2 < 0) || (d3 < 0);
-    has_pos = (d1 > 0) || (d2 > 0) || (d3 > 0);
+    bool has_neg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+    bool has_pos = (d1 > 0) || (d2 > 0) || (d3 > 0);
 
     return !(has_neg && has_pos);
 }
-*/
 
+
+// Shorter, but no speedup
+/*
 inline bool in_triangle(float3 pt, float3 v1, float3 v2, float3 v3)
 {
     float3 pt1 = pt-v1;
@@ -32,7 +32,7 @@ inline bool in_triangle(float3 pt, float3 v1, float3 v2, float3 v3)
     float d3 = cross(pt1, v3-v1).z;
     return !(((d1 < 0) || (d2 < 0) || (d3 < 0)) && ((d1 > 0) || (d2 > 0) || (d3 > 0)));
 }
-
+*/
 
 __kernel void render(__const uint cols, __const __private float8 gt,
         __global const float3 * points, __global const float3 * z_coeffs,
@@ -56,7 +56,7 @@ __kernel void render(__const uint cols, __const __private float8 gt,
     for (int i=0; i < faces_cnt; ++i) {
         if(filter[i]) {
             int3 face = faces[i];
-            if ( in_triangle (p, points[face.s0], points[face.s1], points[face.s2]) ) {
+            if ( PointInTriangle (p, points[face.s0], points[face.s1], points[face.s2]) ) {
                 float z = dot(p,z_coeffs[i]);
                 if (z > result[res_ndx]) {
                     result[res_ndx]= z;
