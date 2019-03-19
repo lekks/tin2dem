@@ -23,7 +23,7 @@ class GeoTiff:
 
         if espg is not None:
             srs = osr.SpatialReference()
-            srs.ImportFromEPSG(3857)
+            srs.ImportFromEPSG(int(espg))
             self.dst_ds.SetProjection(srs.ExportToWkt())
 
     def write_chunk(self, chunk, data):
