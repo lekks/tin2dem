@@ -1,6 +1,7 @@
 
 //https://stackoverflow.com/questions/2049582/how-to-determine-if-a-point-is-in-a-2d-triangle
 //Naive implementation
+/*
 float vsign(float3 p1, float3 p2, float3 p3)
 {
     //TODO use vector and dot
@@ -21,7 +22,16 @@ bool PointInTriangle(float3 pt, float3 v1, float3 v2, float3 v3)
 
     return !(has_neg && has_pos);
 }
+*/
 
+inline bool in_triangle(float3 pt, float3 v1, float3 v2, float3 v3)
+{
+    float3 pt1 = pt-v1;
+    float d1 = cross(pt1, v1-v2).z;
+    float d2 = cross(pt-v3, v2-v3).z;
+    float d3 = cross(pt1, v3-v1).z;
+    return !(((d1 < 0) || (d2 < 0) || (d3 < 0)) && ((d1 > 0) || (d2 > 0) || (d3 > 0)));
+}
 
 
 __kernel void render(__const uint cols, __const __private float8 gt,
@@ -46,7 +56,7 @@ __kernel void render(__const uint cols, __const __private float8 gt,
     for (int i=0; i < faces_cnt; ++i) {
         if(filter[i]) {
             int3 face = faces[i];
-            if ( PointInTriangle (p, points[face.s0], points[face.s1], points[face.s2]) ) {
+            if ( in_triangle (p, points[face.s0], points[face.s1], points[face.s2]) ) {
                 float z = dot(p,z_coeffs[i]);
                 if (z > result[res_ndx]) {
                     result[res_ndx]= z;
