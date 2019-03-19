@@ -36,7 +36,8 @@ inline bool in_triangle(float3 pt, float3 v1, float3 v2, float3 v3)
 
 __kernel void render(__const uint cols, __const __private float8 gt,
         __global const float3 * points, __global const float3 * z_coeffs,
-        __global const int3 * faces, __const uint faces_cnt, __global char * filter,
+        __global const int3 * faces,
+        __global __const uint * filtered, __const uint filtered_cnt,
         __global float * result, __global int * debug)
 {
     int row = get_global_id(0);
@@ -53,16 +54,15 @@ __kernel void render(__const uint cols, __const __private float8 gt,
     //printf("Geotransform = %2.2v8hlf\n", gt);
     //printf("x,y = (%.2f,%.2f)\n", x, y);
 
-    for (int i=0; i < faces_cnt; ++i) {
-        if(filter[i]) {
-            int3 face = faces[i];
-            if ( PointInTriangle (p, points[face.s0], points[face.s1], points[face.s2]) ) {
-                float z = dot(p,z_coeffs[i]);
-                if (z > result[res_ndx]) {
-                    result[res_ndx]= z;
-                }
-                debug[res_ndx] = i+1;
+    for (uint i=0; i < filtered_cnt; ++i) {
+        uint face_ndx = filtered[i];
+        int3 face = faces[face_ndx];
+        if ( PointInTriangle (p, points[face.s0], points[face.s1], points[face.s2]) ) {
+            float z = dot(p,z_coeffs[face_ndx]);
+            if (z > result[res_ndx]) {
+                result[res_ndx]= z;
             }
+            debug[res_ndx] = face_ndx+1;
         }
     }
 }

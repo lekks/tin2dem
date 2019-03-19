@@ -71,10 +71,11 @@ class Render:
 
         return self.filter_buf
 
-    def _filter_buf_to_array(self, filter_buf):
+    def _select_filtered(self, filter_buf):
         filter_vec = np.empty(self.faces_cnt, dtype=self.filter_type)
         cl.enqueue_copy(self.queue, filter_vec, filter_buf)
-        return filter_vec
+        filtered = np.nonzero(filter_vec)[0].astype(pyopencl.cltypes.uint)
+        return filtered
 
     def render_dem(self, dem_info, filter_buf=None):
 
@@ -83,24 +84,31 @@ class Render:
             cl.enqueue_fill_buffer(self.queue, filter_buf, self.filter_type(1), 0,
                                    self.faces_cnt * np.dtype(self.filter_type).itemsize)
 
+        filtered_vec = self._select_filtered(filter_buf)
+        filtered_count = len(filtered_vec)
+        log.debug("Filtered {} triangles".format(filtered_count))
+
         shape = (dem_info.height, dem_info.width)
 
         debug_vec = np.empty(shape, dtype=cl.cltypes.int)
         debug_buf = cl.Buffer(self.ctx, cl.mem_flags.WRITE_ONLY, debug_vec.nbytes)
         cl.enqueue_fill_buffer(self.queue, debug_buf, cl.cltypes.int(-1), 0, debug_vec.nbytes)
 
-        gt = np.array(tuple(dem_info.gt+[0, 0]), dtype=pyopencl.cltypes.float8)
-
         result_vec = np.empty(shape, dtype=cl.cltypes.float)
         result_buf = cl.Buffer(self.ctx, cl.mem_flags.WRITE_ONLY, result_vec.nbytes)
         cl.enqueue_fill_buffer(self.queue, result_buf, cl.cltypes.float(self.nodata_value), 0, result_vec.nbytes)
 
-        self.prg.render(self.queue, shape, None,
-                        np.uint32(shape[1]), gt,
-                        self.points, self.zcoef_buf,
-                        self.faces, cl.cltypes.uint(self.faces_cnt),
-                        filter_buf,
-                        result_buf, debug_buf)
+        if filtered_count > 0:
+            filtered_buf = cl.Buffer(self.ctx, cl.mem_flags.READ_ONLY, filtered_vec.nbytes)
+            cl.enqueue_copy(self.queue, filtered_buf, filtered_vec)
+            gt = np.array(tuple(dem_info.gt+[0, 0]), dtype=pyopencl.cltypes.float8)
+
+            self.prg.render(self.queue, shape, None,
+                            np.uint32(shape[1]), gt,
+                            self.points, self.zcoef_buf,
+                            self.faces,
+                            filtered_buf, cl.cltypes.uint(filtered_count),
+                            result_buf, debug_buf)
 
         cl.enqueue_copy(self.queue, result_vec, result_buf)
         cl.enqueue_copy(self.queue, debug_vec, debug_buf)

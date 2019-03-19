@@ -37,15 +37,14 @@ def test_filter(test_surface):
 
     bounds = [3, 8, -2, 3] #wesn
 
-    expected = [1, 1, 1, 1, 0, 1, 0, 0]
+    expected = [0, 1, 2, 3, 5]
 
     surface = Surface().from_collections(vertices, faces)
     dem = DemInfo.from_envelope(*bounds, pix_size=1)
     render = Render(surface)
-    result = render._filter_buf_to_array(render.filter_bounds(dem))
+    result = render._select_filtered(render.filter_bounds(dem))
 
     assert list(result) == expected
-
 
 def test_choose_face(test_surface):
     vertices, faces = test_surface
