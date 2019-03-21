@@ -5,7 +5,7 @@ from osgeo import gdal, osr
 class GeoTiff:
     TIFF_DRIVER = gdal.GetDriverByName("GTiff")
 
-    def __init__(self, dem_name, dem_info, nodata_value, shift=(0, 0), espg=None):
+    def __init__(self, dem_name, dem_info, nodata_value, shift=(0, 0), epsg=None):
         assert dem_info.offset_col == 0
         assert dem_info.offset_row == 0
 
@@ -21,9 +21,9 @@ class GeoTiff:
         self.dst_ds.SetGeoTransform(gt)
         self.dst_ds.GetRasterBand(1).SetNoDataValue(nodata_value)
 
-        if espg is not None:
+        if epsg is not None:
             srs = osr.SpatialReference()
-            srs.ImportFromEPSG(int(espg))
+            srs.ImportFromEPSG(int(epsg))
             self.dst_ds.SetProjection(srs.ExportToWkt())
 
     def write_chunk(self, chunk, data):

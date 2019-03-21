@@ -17,9 +17,9 @@ CHUNK_HEIGHT = 256
 
 NO_DATA_VALUE = -32767
 
-def tin2dem(tinn_file, tiff_file, pix_size, espg):
-    if espg is None:
-        log.warn("NO ESPG GIVEN")
+def tin2dem(tinn_file, tiff_file, pix_size, epsg):
+    if epsg is None:
+        log.warn("NO EPSG GIVEN")
     log.info("Let`s read tinn {}".format(tinn_file))
     surface = Surface()
     surface.read_tin(tinn_file)
@@ -29,10 +29,10 @@ def tin2dem(tinn_file, tiff_file, pix_size, espg):
     log.info("Max corner is {}".format(surface.max_vertex))
     shift = surface.shift_origin()
     render = Render(surface, NO_DATA_VALUE)
-    dem = DemInfo.from_envelope(*surface.get_envelope(), pix_size=pix_size)
+    dem = DemInfo.from_envelope(*surface.get_envelope(), pix_size=pix_size, margins=0)
     print (dem.gt)
     print ("Shift {}".format(shift))
-    tiff = GeoTiff(tiff_file, dem, NO_DATA_VALUE, shift, espg)
+    tiff = GeoTiff(tiff_file, dem, NO_DATA_VALUE, shift, epsg)
 
     chunks = list(split_dem(dem, CHUNK_WIDTH, CHUNK_WIDTH))
     for chunk in tqdm(chunks):
@@ -46,9 +46,9 @@ def main():
     parser.add_argument("tinn")
     parser.add_argument("tiff")
     parser.add_argument("--pixel", type=float, default=1.0)
-    parser.add_argument("--espg", type=int, default=None)
+    parser.add_argument("--epsg", type=int, default=None)
     args = parser.parse_args()
-    tin2dem(args.tinn, args.tiff, args.pixel, args.espg)
+    tin2dem(args.tinn, args.tiff, args.pixel, args.epsg)
 
 
 if __name__ == '__main__':
