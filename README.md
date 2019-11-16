@@ -1,7 +1,6 @@
 # tin2dem
 Tool for fast rendering of TIN (Triangular Irregular Networks) surface in LandXML format into DEM (Digital Elevation Model) raster files in GeoTIFF format using OpenCL on CPU or GPU
 
-Current restriction - supports only 1 surface in file
 # Installation
 
 ## Requirements
@@ -9,7 +8,6 @@ Current restriction - supports only 1 surface in file
  - GDAL library with python bindings
  - OpenCL runtime
  
-
 ## Linux
 ### Install dependencies
 ```console
@@ -36,9 +34,22 @@ python -m pytest
 ```
 ### Usage
 ```console
-tin2dem.py [-h] [--pixel PIXEL] [--epsg EPSG] [--chunk CHUNK]
-           [--margins MARGINS]
-           tin tiff
+usage: tin2dem.py [-h] [--pixel PIXEL] [--epsg EPSG] [--chunk CHUNK]
+                  [--margins MARGINS] [--surface SURFACE]
+                  input_tin output_tiff
+
+positional arguments:
+  input_tin
+  output_tiff
+
+optional arguments:
+  -h, --help         show this help message and exit
+  --pixel PIXEL      Pixel size
+  --epsg EPSG        EPSG code
+  --chunk CHUNK      Processing chunk size, optimal value may depend of your
+                     GPU memory.Default is 256
+  --margins MARGINS  Output DEM margins
+  --surface SURFACE  Surface to render if multiple surfaces is found
 ```
 ## Windows
 

@@ -18,16 +18,26 @@ CHUNK_DEFAULT = 256
 NO_DATA_VALUE = -32767
 
 
-def tin2dem(tinn_file, tiff_file, pix_size, epsg, margins, chunk_width, chunk_height):
+def tin2dem(tinn_file, tiff_file, pix_size, epsg, margins, chunk_width, chunk_height, select_surface):
     start = time.time()
     if epsg is None:
         log.warn("NO EPSG GIVEN")
     print ("Reading tin file {} ...".format(tinn_file))
     surface = Surface()
-    surface.read_tin(tinn_file)
-    print ("Found {} points and {} faces".format(len(surface.vertices), len(surface.faces)))
+    surface.read_tin(tinn_file, select_surface)
+    print ("Found {} serfaces, {} points and {} faces".format(surface.surfaces, len(surface.vertices), len(surface.faces)))
+    if len(surface.vertices) == 0 or len(surface.faces) == 0:
+        print ("Nothing to do")
+        exit(1)
+    if surface.surfaces > 1:
+        if select_surface is None:
+            print ("You may want to select one of {} surfaces found".format(surface.surfaces))
+            print (" rendering all of them, however")
+        else:
+            print ("Surface {} is selected to render".format(select_surface))
     print ("Min corner is {}".format(surface.min_vertex))
     print ("Max corner is {}".format(surface.max_vertex))
+
     shift = surface.shift_origin()
     dem = DemInfo.from_envelope(*surface.get_envelope(), pix_size=pix_size, margins=margins)
     tiff = GeoTiff(tiff_file, dem, NO_DATA_VALUE, shift, epsg)
@@ -46,14 +56,17 @@ def tin2dem(tinn_file, tiff_file, pix_size, epsg, margins, chunk_width, chunk_he
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("tin")
-    parser.add_argument("tiff")
-    parser.add_argument("--pixel", type=float, default=1.0)
-    parser.add_argument("--epsg", type=int, default=None)
-    parser.add_argument("--chunk", type=int, default=CHUNK_DEFAULT)
-    parser.add_argument("--margins", type=float, default=None)
+    parser.add_argument("input_tin")
+    parser.add_argument("output_tiff")
+    parser.add_argument("--pixel", type=float, default=1.0, help="Pixel size")
+    parser.add_argument("--epsg", type=int, default=None, help="EPSG code")
+    parser.add_argument("--chunk", type=int, default=CHUNK_DEFAULT, help="Processing chunk size, "
+                                                                         "optimal value may depend of your GPU memory."
+                                                                         "Default is 256")
+    parser.add_argument("--margins", type=float, default=None, help="Output DEM margins")
+    parser.add_argument("--surface", type=int, default=None, help="Surface to render if multiple surfaces is found")
     args = parser.parse_args()
-    tin2dem(args.tin, args.tiff, args.pixel, args.epsg, args.margins, args.chunk, args.chunk)
+    tin2dem(args.input_tin, args.output_tiff, args.pixel, args.epsg, args.margins, args.chunk, args.chunk, args.surface)
 
 
 if __name__ == '__main__':

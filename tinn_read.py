@@ -1,8 +1,10 @@
 import logging
+import re
 import sys
 import xml.etree.ElementTree as etree
 
 log = logging.getLogger("Surface reader")
+NS_TAG = re.compile("{http://www\.landxml\.org/schema/LandXML-\d\.\d}(\w+)")
 
 
 class Surface:
@@ -11,6 +13,7 @@ class Surface:
         self.max_vertex = [None, None, None]
         self.vertices = list()
         self.faces = list()
+        self.surfaces = 0
 
     def add_vertex(self, vid, coord):
         log.debug("Point {}=({})".format(vid, coord))
@@ -20,7 +23,7 @@ class Surface:
                 self.min_vertex[i] = coord[i]
             if self.max_vertex[i] is None or self.max_vertex[i] < coord[i]:
                 self.max_vertex[i] = coord[i]
-        self.vertices.append(tuple([vid]+list(coord)))
+        self.vertices.append(tuple([vid] + list(coord)))
 
     def add_face(self, points):
         log.debug("Face {}".format(points))
@@ -43,39 +46,38 @@ class Surface:
         self.min_vertex = (self.min_vertex[0] - x_shift, self.min_vertex[1] - y_shift, self.min_vertex[2])
         return x_shift, y_shift
 
-    def read_tin(self, filename, swap = False):
-        # http://boscoh.com/programming/reading-xml-serially.html
-        # https://docs.python.org/2/library/xml.etree.elementtree.html#tutorial
-
+    def read_tin(self, filename, select_surface, swap=False):
         def is_landxml_tag(tag, name):
-            return tag == "{http://www.landxml.org/schema/LandXML-1.2}" + name
+            return NS_TAG.findall(tag)[0] == name
 
         # todo test elem.clear() on large files
-        surfaces = 0
+        surface = 0
         with open(filename, "r") as xmlfile:
             for event, elem in etree.iterparse(xmlfile, events=('start', 'end')):
                 if event == "start":
                     if is_landxml_tag(elem.tag, "Surface"):
-                        surfaces += 1
-                elif event == "end": #at the start "text" field is undefined
-                    if is_landxml_tag(elem.tag, "P"):
-                        coord = list(map(float, elem.text.split()))
-                        if not swap:
-                            coord[0], coord[1] = coord[1], coord[0]
-                        self.add_vertex(int(elem.attrib["id"]), coord)
-                    elif is_landxml_tag(elem.tag, "F"):
-                        #http://www.landxml.org/schema/LandXML-1.2/documentation/LandXML-1.2Doc_F.html
-                        if "i" in elem.attrib and elem.attrib["i"] == "1":
-                            log.debug("invisible face")
-                        else:
-                            points = tuple(map(int, elem.text.split()))
-                            self.add_face(points)
-        log.info("Found %s surfaces", surfaces)
-        assert surfaces == 1, "Found %s surfaces, supporting only 1"
+                        surface += 1
+                elif event == "end":  # at the start "text" field is undefined
+                    if select_surface is None or surface == select_surface:
+                        if is_landxml_tag(elem.tag, "P"):
+                            coord = list(map(float, elem.text.split()))
+                            if not swap:
+                                coord[0], coord[1] = coord[1], coord[0]
+                            self.add_vertex(int(elem.attrib["id"]), coord)
+                        elif is_landxml_tag(elem.tag, "F"):
+                            # http://www.landxml.org/schema/LandXML-1.2/documentation/LandXML-1.2Doc_F.html
+                            if "i" in elem.attrib and elem.attrib["i"] == "1":
+                                log.debug("invisible face")
+                            else:
+                                points = tuple(map(int, elem.text.split()))
+                                self.add_face(points)
+        self.surfaces = surface
+        log.info("Found %s surfaces", surface)
         return self
 
     def get_envelope(self):
         return self.min_vertex[0], self.max_vertex[0], self.min_vertex[1], self.max_vertex[1]
+
 
 def debug_small():
     logging.basicConfig(level=logging.DEBUG, stream=sys.stdout,
@@ -83,7 +85,7 @@ def debug_small():
 
     surface = Surface()
     surface.read_tin("test/2slopesT1.xml")
-    #surface.read_tin("test/sky_crop.xml")
+    # surface.read_tin("test/sky_crop.xml")
 
 
 def run_large(file_name="test/russell.xml"):

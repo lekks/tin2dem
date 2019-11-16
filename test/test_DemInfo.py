@@ -4,7 +4,7 @@ import pytest
 
 def test_simple_geotransform():
     bbox = 100, 200, 100, 200
-    dem = DemInfo.from_envelope(*bbox, pix_size=1)
+    dem = DemInfo.from_envelope(*bbox, pix_size=1, margins=0)
 
     expected_gt = [100, 1, 0, 200, 0, -1]
     # print dem.gt
@@ -21,7 +21,7 @@ def test_simple_geotransform():
 
 def test_real_geotransform():
     bbox = -13043520.255, -13043367.381, 3869089.498, 3869242.372
-    dem = DemInfo.from_envelope(*bbox, pix_size=0.14929107)
+    dem = DemInfo.from_envelope(*bbox, pix_size=0.14929107, margins=0)
     expected_gt = [-13043520.2546954303979874, 0.14929107, 0.0, 3869242.3717958591878414, 0.0, -0.14929107]
 
     assert dem.width == 1024
@@ -34,7 +34,7 @@ def test_real_geotransform():
 
 
 def test_split_dem():
-    dem = DemInfo.from_envelope(100, 200, 100, 200, pix_size=1)
+    dem = DemInfo.from_envelope(100, 200, 100, 200, pix_size=1, margins=0)
     chunks = tuple(split_dem(dem, 51, 21))
     assert len(chunks) == 10
     expected_gt = [[100, 1, 0, 200, 0, -1],
