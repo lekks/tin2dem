@@ -1,5 +1,5 @@
 # tin2dem
-Tool for fast rendering of TIN (Triangular Irregular Networks) surface in LandXML format into DEM (Digital Elevation Model) raster files in GeoTIFF format using OpenCL on CPU or GPU
+Tool for **fast** rendering of TIN (Triangular Irregular Networks) surface in LandXML format into DEM (Digital Elevation Model) raster files in GeoTIFF format using OpenCL on CPU or GPU
 
 # Installation
 
@@ -20,7 +20,7 @@ Tool for fast rendering of TIN (Triangular Irregular Networks) surface in LandXM
 Here is the list of OpenCL implementations: https://www.iwocl.org/resources/opencl-implementations/  
 Install runtime corresponding to your GPU
 
-You can use universal runtime POCL and run render using CPU only:
+You can use universal runtime POCL and run render with CPU:
 ```console
 sudo apt install pocl-opencl-icd
 ```
@@ -53,7 +53,11 @@ optional arguments:
   --margins MARGINS  Output DEM margins
   --surface SURFACE  Surface to render if multiple surfaces is found 
 ```
-run "PYOPENCL_CTX=0 ./tin2dem.py ..." if you don't want choose runtime every time
+set PYOPENCL_CTX environment variable if you don't want choose runtime every time,
+for example:
+``` 
+PYOPENCL_CTX=0 ./tin2dem.py tin.xml dem.tif
+```
 ## Examples
 Render example files from landxml.org
 ```console
