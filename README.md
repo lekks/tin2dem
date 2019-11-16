@@ -32,8 +32,10 @@ and run test
 ```console
 python -m pytest
 ```
-### Usage
-```console
+## Windows
+
+# Usage
+```
 usage: tin2dem.py [-h] [--pixel PIXEL] [--epsg EPSG] [--chunk CHUNK]
                   [--margins MARGINS] [--surface SURFACE]
                   input_tin output_tiff
@@ -49,7 +51,17 @@ optional arguments:
   --chunk CHUNK      Processing chunk size, optimal value may depend of your
                      GPU memory.Default is 256
   --margins MARGINS  Output DEM margins
-  --surface SURFACE  Surface to render if multiple surfaces is found
+  --surface SURFACE  Surface to render if multiple surfaces is found 
 ```
-## Windows
-
+run "PYOPENCL_CTX=0 ./tin2dem.py ..." if you don't want choose runtime every time
+## Examples
+Render example files from landxml.org
+```console
+wget http://landxml.org/schema/LandXML-2.0/samples/Carlson%20Software/Olympus_Subdivision-2.0.xml
+./tin2dem.py Olympus_Subdivision-2.0.xml Olympus_Subdivision-2.0.tif
+```
+Multiple surfaces:
+```console
+wget http://landxml.org/schema/LandXML-1.1/samples/BLUERIDGE%20Analytics/siteops.xml
+./tin2dem.py siteops.xml siteops.tif --surface=4
+```

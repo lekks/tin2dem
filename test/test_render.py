@@ -1,7 +1,6 @@
 from dem_geo import DemInfo
 from render import Render
-from tinn_read import Surface
-import numpy as np
+from tin_read import Surface
 import pytest
 
 

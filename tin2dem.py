@@ -10,7 +10,7 @@ from tqdm import tqdm
 from dem_file import GeoTiff
 from dem_geo import DemInfo, split_dem
 from render import Render
-from tinn_read import Surface
+from tin_read import Surface
 
 log = logging.getLogger("tin to dem")
 
