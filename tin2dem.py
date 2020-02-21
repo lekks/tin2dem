@@ -10,7 +10,7 @@ from tqdm import tqdm
 from dem_file import GeoTiff
 from dem_geo import DemInfo, split_dem
 from render import Render
-from tin_read import Surface
+from surface import Surface
 
 log = logging.getLogger("tin to dem")
 
@@ -24,7 +24,7 @@ def tin2dem(tinn_file, tiff_file, pix_size, epsg, margins, chunk_width, chunk_he
         log.warn("NO EPSG GIVEN")
     print ("Reading tin file {} ...".format(tinn_file))
     surface = Surface()
-    surface.read_tin(tinn_file, select_surface)
+    surface.from_file(tinn_file, select_surface)
     print ("Found {} serfaces, {} points and {} faces".format(surface.surfaces, len(surface.vertices), len(surface.faces)))
     if len(surface.vertices) == 0 or len(surface.faces) == 0:
         print ("Nothing to do")

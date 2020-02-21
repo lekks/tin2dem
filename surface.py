@@ -47,7 +47,7 @@ class Surface:
     def get_envelope(self):
         return self.min_vertex[0], self.max_vertex[0], self.min_vertex[1], self.max_vertex[1]
 
-    def read_tin(self, filename, select_surface, swap_xy=False):
+    def from_file(self, filename, select_surface, swap_xy=False):
         surfaces_list = parse_xml(filename)
         for i, surface in enumerate(surfaces_list):
             if select_surface is None or i == select_surface:
