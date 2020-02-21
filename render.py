@@ -8,7 +8,7 @@ import pyopencl.cltypes
 
 from dem_geo import DemInfo
 from plane_math import equation_plane, norm_z
-from tin_read import Surface
+from surface import Surface
 
 log = logging.getLogger("render")
 
