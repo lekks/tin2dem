@@ -49,13 +49,22 @@ class Surface:
 
     def from_file(self, filename, select_surface, swap_xy=False):
         surfaces_list = parse_xml(filename)
-        for i, surface in enumerate(surfaces_list):
-            if select_surface is None or i == select_surface:
-                for vid, coords in surface['P'].items():
+        self.surfaces = len(surfaces_list)
+        if select_surface is not None:
+            for i, surface in enumerate(surfaces_list):
+                if i == select_surface:
+                    for vid, (point_index, coords) in surface['P'].items():
+                        if not swap_xy:
+                            coords[0], coords[1] = coords[1], coords[0]
+                        self.add_vertex(vid, coords)
+                    for f in surface['F']:
+                        self.add_face(f)
+        else:
+            for surface in surfaces_list:
+                for vid, (point_index, coords) in surface['P'].items():
                     if not swap_xy:
                         coords[0], coords[1] = coords[1], coords[0]
-                    self.add_vertex(vid, coords)
-
+                    self.add_vertex(point_index, coords)
                 for f in surface['F']:
+                    f = list(map(lambda p: surface['P'][p][0], f))
                     self.add_face(f)
-        self.surfaces = len(surfaces_list)

@@ -12,6 +12,7 @@ def parse_xml(filename):
         return NS_TAG.findall(tag)[0] == name
 
     surfaces = []
+    point_index = 0
     with open(filename, "r") as xmlfile:
         for event, elem in etree.iterparse(xmlfile, events=('start', 'end')):
             if event == "start":
@@ -20,7 +21,8 @@ def parse_xml(filename):
             elif event == "end" and surfaces:  # at the start "text" field is undefined
                 if is_landxml_tag(elem.tag, "P"):
                     coord = list(map(float, elem.text.split()))
-                    surfaces[-1]['P'][int(elem.attrib["id"])] = coord
+                    surfaces[-1]['P'][int(elem.attrib["id"])] = (point_index, coord)
+                    point_index += 1
                 elif is_landxml_tag(elem.tag, "F"):
                     # http://www.landxml.org/schema/LandXML-1.2/documentation/LandXML-1.2Doc_F.html
                     if "i" in elem.attrib and elem.attrib["i"] == "1":
