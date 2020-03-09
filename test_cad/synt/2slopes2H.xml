@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<LandXML xmlns="http://www.landxml.org/schema/LandXML-1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.landxml.org/schema/LandXML-1.2 http://www.landxml.org/schema/LandXML-1.2/LandXML-1.2.xsd" date="2018-08-30" time="09:22:42" version="1.2" language="English" readOnly="false">
+	<Units>
+		<Imperial areaUnit="squareFoot" linearUnit="foot" volumeUnit="cubicYard" temperatureUnit="fahrenheit" pressureUnit="inchHG" diameterUnit="inch" angularUnit="decimal degrees" directionUnit="decimal degrees"></Imperial>
+	</Units>
+	<Project name="C:\Users\pavelzinatullin\Documents\4342.dwg"></Project>
+	<Application name="AutoCAD Civil 3D" desc="Civil 3D" manufacturer="Autodesk, Inc." version="2018" manufacturerURL="www.autodesk.com/civil" timeStamp="2018-08-30T09:22:42"></Application>
+	<Surfaces>
+		<Surface name="faria-test" desc="Описание">
+			<SourceData>
+				<Breaklines>
+					<Breakline brkType="standard" desc="Структурная линия установлена1">
+						<PntList3D>0. 6. 0. 0. 4. 18.</PntList3D>
+					</Breakline>
+					<Breakline brkType="standard" desc="Структурная линия установлена1">
+						<PntList3D>3. 4. 18. 3. 6. 0.</PntList3D>
+					</Breakline>
+				</Breaklines>
+			</SourceData>
+			<Definition surfType="TIN" area2DSurf="18." area3DSurf="112.077173601508" elevMax="18." elevMin="0.">
+				<Pnts>
+					<P id="5">0. 0. 0.</P>
+					<P id="6">0. 3. 18.</P>
+					<P id="7">3. 0. 0.</P>
+					<P id="8">3. 3. 18.</P>
+					<P id="9">0. 6. 0.</P>
+					<P id="10">3. 6. 0.</P>
+					<P id="11">0. 4. 18.</P>
+					<P id="12">3. 4. 18.</P>
+				</Pnts>
+				<Faces>
+					<F n="0 0 3">7 5 6</F>
+					<F n="4 0 6">12 6 11</F>
+					<F n="0 1 4">8 7 6</F>
+					<F n="0 3 2">12 8 6</F>
+					<F n="0 0 6">11 9 10</F>
+					<F n="2 5 0">12 11 10</F>
+				</Faces>
+			</Definition>
+		</Surface>
+	</Surfaces>
+</LandXML>
