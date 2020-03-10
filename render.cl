@@ -54,8 +54,7 @@ __kernel void render(__const uint cols, __const __private float8 gt,
         uint face_ndx = filtered[i];
         int3 face = faces[face_ndx];
         if (z_coeffs[face_ndx].s3 && in_triangle (p, points[face.s0], points[face.s1], points[face.s2]) ) {
-            float4 zc=z_coeffs[face_ndx];
-            float z = dot(p, (float3)(zc.s0, zc.s1, zc.s2));
+            float z = dot(p, as_float3(z_coeffs[face_ndx]));
             if (z > result[res_ndx]) {
                 result[res_ndx]= z;
             }
