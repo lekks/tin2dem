@@ -18,8 +18,7 @@ CHUNK_DEFAULT = 256
 NO_DATA_VALUE = -32767
 
 
-def tin2dem(tinn_file, tiff_file, pix_size, epsg, margins, chunk_width, chunk_height, select_surface,
-            pixels_shift, model_shift):
+def tin2dem(tinn_file, tiff_file, pix_size, epsg, margins, chunk_width, chunk_height, select_surface, cad_mode):
     start = time.time()
     if epsg is None:
         log.warn("NO EPSG GIVEN")
@@ -42,7 +41,7 @@ def tin2dem(tinn_file, tiff_file, pix_size, epsg, margins, chunk_width, chunk_he
 
     origin = surface.shift_origin()
     dem = DemInfo.from_envelope(*surface.get_envelope(), pix_size=pix_size, margins=margins)
-    shift = (origin[0] + pixels_shift[0], origin[1] + pixels_shift[1])
+    shift = (origin[0] + pix_size / 2, origin[1] + pix_size / 2) if cad_mode else origin
     tiff = GeoTiff(tiff_file, dem, NO_DATA_VALUE, shift, epsg)
 
     print("Preprocessing...")
@@ -68,11 +67,11 @@ def main():
                                                                          "Default is 256")
     parser.add_argument("--margins", type=float, default=None, help="Output DEM margins")
     parser.add_argument("--surface", type=int, default=None, help="Surface to render if multiple surfaces is found")
-    parser.add_argument("--model_shift", nargs=2, type=float, default=[0.0, 0.0], help="Shift model")
-    parser.add_argument("--pixels_shift", nargs=2, type=float, default=[0.0, 0.0], help="Shift pixels")
+    parser.add_argument("-a", "--autocad", action='store_true',
+                        help="Autocad compatible output (shift on 1/2 pixels)")
     args = parser.parse_args()
     tin2dem(args.input_tin, args.output_tiff, args.pixel, args.epsg, args.margins, args.chunk, args.chunk, args.surface,
-            args.pixels_shift, args.model_shift)
+            args.autocad)
 
 
 if __name__ == '__main__':

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-export PYOPENCL_CTX='1'
+export PYOPENCL_CTX='0'
 
 function simple() {
 	files=(\
@@ -15,20 +15,20 @@ function simple() {
 		name=${bname%.*}
 		path=$(dirname "${f}")
 		mkdir -p "$path/out"
-		../tin2dem.py $f $path/out/$name-td-1ft.tif --pixels_shift 0.5 0.5
-		../tin2dem.py $f $path/out/$name-td-1ft.tif --pixels_shift 0.15 0.15 --pixel=0.3
+		../tin2dem.py $f $path/out/$name-td-1ft.tif -a
+		../tin2dem.py $f $path/out/$name-td-0.3ft.tif --pixel=0.3 -a
 	done
 
 		mkdir -p "$path/out"
 }
 
 function complex() {
-	mkdir -p cplx_test/out
-	../tin2dem.py cplx_test/cplx_test.xml cplx_test/out/cplx_test-td-0.01.tif --pixel=0.01 --pixels_shift 0.005 0.005
-	../tin2dem.py cplx_test/cplx_test.xml cplx_test/out/cplx_test-td-0.02.tif --pixel=0.02 --pixels_shift 0.01 0.01
-	../tin2dem.py cplx_test/cplx_test.xml cplx_test/out/cplx_test-td-0.005.tif --pixel=0.005 --pixels_shift 0.0025 0.0025
+	mkdir -p synt/out
+	../tin2dem.py synt/cplx_test.xml synt/out/cplx_test-td-0.01.tif --pixel=0.01 -a
+	../tin2dem.py synt/cplx_test.xml synt/out/cplx_test-td-0.02.tif --pixel=0.02 -a
+	../tin2dem.py synt/cplx_test.xml synt/out/cplx_test-td-0.005.tif --pixel=0.005 -a
 }
 
-#simple
+simple
 complex
 
