@@ -1,6 +1,6 @@
-from tin2dem.dem_geo import DemInfo
-from tin2dem.render import Render
-from tin2dem.surface import Surface
+from dem_geo import DemInfo
+from render import Render
+from surface import Surface
 import pytest
 
 
@@ -10,7 +10,7 @@ def test_surface():
         1: [1.0,   5.0,  2.0],
         2: [3.0,   5.0,  2.0],
         3: [2.0,   2.0,  2.0],
-        4: [5.0,   2.0,  2.0],
+        4: [5.0,   2.0,     2.0],
         5: [9.0,   2.0,  2.0],
         6: [12.0,  1.0,  2.0],
         7: [11.0, -3.0,  2.0],
@@ -53,7 +53,7 @@ def test_cad_compatible(cad_surface):
     vertices, faces = cad_surface
     surface = Surface().from_collections(vertices, faces)
     render = Render(surface)
-    # TODO check result is same as cad result
+    print(surface.get_envelope())
 
 
 

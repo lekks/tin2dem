@@ -5,7 +5,7 @@ import numpy as np
 import pyopencl as cl
 import pyopencl.cltypes
 
-from tin2dem.plane_math import equation_plane, norm_z
+from plane_math import equation_plane, norm_z
 
 log = logging.getLogger("render")
 
