@@ -1,14 +1,11 @@
 import logging
 import os
-import sys
 
 import numpy as np
 import pyopencl as cl
 import pyopencl.cltypes
 
-from dem_geo import DemInfo
 from plane_math import equation_plane, norm_z
-from surface import Surface
 
 log = logging.getLogger("render")
 
@@ -35,34 +32,15 @@ class Render:
         zcoef_vec = self.make_faces_zcoef(points_vec, faces_vec)
         self.zcoef_buf = cl.Buffer(self.ctx, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=zcoef_vec)
 
-        self.filter_buf = cl.Buffer(self.ctx, cl.mem_flags.READ_WRITE, self.faces_cnt * np.dtype(self.filter_type).itemsize)
-
-
-    @staticmethod
-    def make_faces_zcoef(points, faces):
-        log.info("Calculating z coefficients")
-        arr_coefs = np.zeros((len(faces),), cl.cltypes.float3)
-
-        orth_cnt = 0
-        for i, pnts in enumerate(faces):
-            p1 = tuple(points[pnts[0]])[:3]
-            p2 = tuple(points[pnts[1]])[:3]
-            p3 = tuple(points[pnts[2]])[:3]
-            eq_coef = equation_plane(p1, p2, p3)
-            if eq_coef[2] == 0:
-                log.debug("Orthogonal face {}, points {} at {}".format(i, tuple(pnts)[:3], (p1, p2, p3), eq_coef))
-                orth_cnt += 1
-            else:
-                za, zb, zc = norm_z(eq_coef)
-                arr_coefs[i] = za, zb, zc, 0
-        log.info("Found {} orthogonal faces".format(orth_cnt))
-        return arr_coefs
+        self.filter_buf = cl.Buffer(self.ctx, cl.mem_flags.READ_WRITE,
+                                    self.faces_cnt * np.dtype(self.filter_type).itemsize)
 
     def filter_bounds(self, dem_info):
         bounds = dem_info.bbox()
         bounds_vec = np.array(tuple(bounds), dtype=pyopencl.cltypes.float4)
 
-        cl.enqueue_fill_buffer(self.queue, self.filter_buf, self.filter_type(0), 0, self.faces_cnt * np.dtype(self.filter_type).itemsize)
+        cl.enqueue_fill_buffer(self.queue, self.filter_buf, self.filter_type(0), 0,
+                               self.faces_cnt * np.dtype(self.filter_type).itemsize)
 
         self.prg.filter(self.queue, (self.faces_cnt, 1), None,
                         bounds_vec, self.points,
@@ -101,7 +79,7 @@ class Render:
         if filtered_count > 0:
             filtered_buf = cl.Buffer(self.ctx, cl.mem_flags.READ_ONLY, filtered_vec.nbytes)
             cl.enqueue_copy(self.queue, filtered_buf, filtered_vec)
-            gt = np.array(tuple(dem_info.gt+[0, 0]), dtype=pyopencl.cltypes.float8)
+            gt = np.array(tuple(dem_info.gt + [0, 0]), dtype=pyopencl.cltypes.float8)
 
             self.prg.render(self.queue, shape, None,
                             np.uint32(shape[1]), gt,
@@ -135,7 +113,7 @@ class Render:
     @staticmethod
     def make_faces_zcoef(points, faces):
         log.info("Calculating z coefficients")
-        arr_coefs = np.zeros((len(faces),), cl.cltypes.float3)
+        arr_coefs = np.zeros((len(faces),), cl.cltypes.float4)
 
         orth_cnt = 0
         for i, pnts in enumerate(faces):
@@ -145,10 +123,10 @@ class Render:
             eq_coef = equation_plane(p1, p2, p3)
             if eq_coef[2] == 0:
                 log.debug("Orthogonal face {}, points {} at {}".format(i, tuple(pnts)[:3], (p1, p2, p3), eq_coef))
-                orth_cnt+=1
+                orth_cnt += 1
             else:
                 za, zb, zc = norm_z(eq_coef)
-                arr_coefs[i] = za, zb, zc, 0
+                arr_coefs[i] = (za, zb, zc, 1)
         log.info("Found {} orthogonal faces".format(orth_cnt))
         return arr_coefs
 
@@ -158,25 +136,3 @@ class Render:
         abs_file_path = os.path.join(script_dir, rel_path)
         with open(abs_file_path, 'r') as f:
             return f.read()
-
-
-def debug_render():
-    logging.basicConfig(level=logging.DEBUG, stream=sys.stdout,
-                        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-    vertices = {0: (0.0, 0.0, 0.0), 1: (0.0, 3.0, 18.0), 2: (0.0, 6.0, 0.0),
-                3: (3.0, 0.0, 0.0), 4: (3.0, 3.0, 18.0), 5: (3.0, 6.0, 0.0)}
-    faces = [(0, 1, 3), (3, 4, 1), (1, 2, 4), (2, 5, 4)]
-    surface = Surface().from_collections(vertices, faces)
-
-    print(Render.vertexes_as_ndarray(surface.vertices))
-    print(Render.faces_as_ndarray(surface.faces))
-
-    dem = DemInfo([0.0, 1.0, 0.0, 4.0, 0.0, -1.0], 10, 10)
-    result, debug = Render(surface).render_dem(dem)
-    print(result)
-    print(debug)
-
-
-if __name__ == '__main__':
-    debug_render()

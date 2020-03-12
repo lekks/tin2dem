@@ -10,7 +10,7 @@ def test_surface():
         1: [1.0,   5.0,  2.0],
         2: [3.0,   5.0,  2.0],
         3: [2.0,   2.0,  2.0],
-        4: [5.0,   2.0,  2.0],
+        4: [5.0,   2.0,     2.0],
         5: [9.0,   2.0,  2.0],
         6: [12.0,  1.0,  2.0],
         7: [11.0, -3.0,  2.0],
@@ -29,6 +29,33 @@ def test_surface():
         (1, 3, 9)
     ]
     return vertices, faces
+
+@pytest.fixture
+def cad_surface():
+    vertices = {
+        0: [0, 0, 0],
+        1: [0, 3, 18],
+        2: [0, 6, 0],
+        3: [3, 0, 0],
+        4: [3, 3, 18],
+        5: [3, 6, 0],
+    }
+
+    faces = [
+        (0, 1, 3),
+        (3, 4, 1),
+        (1, 2, 4),
+        (2, 5, 4)
+    ]
+    return vertices, faces
+
+def test_cad_compatible(cad_surface):
+    vertices, faces = cad_surface
+    surface = Surface().from_collections(vertices, faces)
+    render = Render(surface)
+    print(surface.get_envelope())
+
+
 
 
 def test_filter(test_surface):
