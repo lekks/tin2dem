@@ -1,4 +1,4 @@
-from plane_math import equation_plane, solve_z, norm_z
+from tin2dem.plane_math import equation_plane, solve_z, norm_z
 
 
 def test_equation():

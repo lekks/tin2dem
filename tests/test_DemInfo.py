@@ -1,4 +1,4 @@
-from dem_geo import split_dem, DemInfo
+from tin2dem.dem_geo import split_dem, DemInfo
 import pytest
 
 

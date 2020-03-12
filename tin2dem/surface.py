@@ -1,6 +1,6 @@
 import logging
 
-from xml_parser import parse_xml
+from tin2dem.xml_parser import parse_xml
 
 log = logging.getLogger("TIN model")
 
