@@ -14,6 +14,9 @@ setup(
     ],
     keywords="DEM LandXML",  # Separate with spaces
     packages=['tin2dem'],
+    package_data={
+        "tin2dem": ["*.cl"],
+    },
     install_requires=open('requirements.txt').read().split(),
     entry_points={
         'console_scripts':
