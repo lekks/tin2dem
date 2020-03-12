@@ -33,7 +33,7 @@ clinfo -l
 install package using pip
 
 ```console
-
+pip3 install git+ssh://git@github.com/lekks/tin2dem
 ```
 
 or checkout from git and run test
