@@ -11,9 +11,9 @@ Tool for **fast** rendering of TIN (Triangular Irregular Networks) surface in La
 ## Linux
 ### Install dependencies
 ```console
-  sudo add-apt-repository ppa:ubuntugis/ubuntugis-stable
+  sudo add-apt-repository ppa:ubuntugis/ppa
   sudo apt-get update
-  sudo apt-get install python3-pip gdal-bin python3-gdal clinfo
+  sudo apt-get install python3-pip gdal-bin gdal-data python3-gdal clinfo
 ``` 
 
 
@@ -38,8 +38,8 @@ pip3 install git+ssh://git@github.com/lekks/tin2dem
 
 or checkout from git and run test
 ```console
-sudo apt-get install python3-pip
-python3 -m pytest
+sudo apt-get install python3-pytest
+py.test-3 tests
 ```
 ## Windows
 
