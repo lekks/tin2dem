@@ -22,6 +22,9 @@ class Render:
         code = self.read_file("render.cl")
         self.prg = cl.Program(self.ctx, code)
         self.prg.build()
+
+        self.kernel_filter = cl.Kernel(self.prg, "filter")
+        self.kernel_render = cl.Kernel(self.prg, "render")
         points_vec = self.vertexes_as_ndarray(surface.vertices)
         self.points = cl.Buffer(self.ctx, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=points_vec)
 
@@ -42,10 +45,10 @@ class Render:
         cl.enqueue_fill_buffer(self.queue, self.filter_buf, self.filter_type(0), 0,
                                self.faces_cnt * np.dtype(self.filter_type).itemsize)
 
-        self.prg.filter(self.queue, (self.faces_cnt, 1), None,
-                        bounds_vec, self.points,
-                        self.faces, cl.cltypes.uint(self.faces_cnt),
-                        self.filter_buf)
+        self.kernel_filter(self.queue, (self.faces_cnt, 1), None,
+                           bounds_vec, self.points,
+                           self.faces, cl.cltypes.uint(self.faces_cnt),
+                           self.filter_buf)
 
         return self.filter_buf
 
@@ -81,12 +84,12 @@ class Render:
             cl.enqueue_copy(self.queue, filtered_buf, filtered_vec)
             gt = np.array(tuple(dem_info.gt + [0, 0]), dtype=pyopencl.cltypes.float8)
 
-            self.prg.render(self.queue, shape, None,
-                            np.uint32(shape[1]), gt,
-                            self.points, self.zcoef_buf,
-                            self.faces,
-                            filtered_buf, cl.cltypes.uint(filtered_count),
-                            result_buf, debug_buf)
+            self.kernel_render(self.queue, shape, None,
+                               np.uint32(shape[1]), gt,
+                               self.points, self.zcoef_buf,
+                               self.faces,
+                               filtered_buf, cl.cltypes.uint(filtered_count),
+                               result_buf, debug_buf)
 
         cl.enqueue_copy(self.queue, result_vec, result_buf)
         cl.enqueue_copy(self.queue, debug_vec, debug_buf)
