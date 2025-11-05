@@ -35,6 +35,5 @@ set -xe
 docker run -it --rm \
     -v "$(realpath $INPUT_FILE)":/var/input.xml \
     -v "$(pwd)":/var/output/ \
-    --entrypoint /usr/local/bin/tin2dem \
     "$DOCKER_TAG" \
     /var/input.xml /var/output/"$OUTPUT_FILE"

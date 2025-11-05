@@ -55,3 +55,4 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=builder /opt/wheels /opt/wheels
 RUN pip3 install --break-system-packages --no-cache-dir /opt/wheels/*.whl
 COPY --from=testing /tmp/test-results.xml /tmp/test-results.xml
+ENTRYPOINT ["/usr/local/bin/tin2dem"]
