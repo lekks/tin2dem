@@ -79,3 +79,67 @@ Multiple surfaces:
 wget http://landxml.org/schema/LandXML-1.1/samples/BLUERIDGE%20Analytics/siteops.xml
 tin2dem siteops.xml siteops.tif --surface=4
 ```
+
+## Docker
+
+Two Docker images are available: CPU (with POCL) and GPU (vendor-agnostic, requires host GPU runtime).
+
+### Building Images
+
+**CPU Image (POCL - works everywhere):**
+```console
+make docker-build-cpu
+```
+
+**GPU Image (requires NVIDIA/AMD runtime on host):**
+```console
+make docker-build-gpu
+```
+
+### Running with Docker
+
+**CPU Image:**
+```console
+black-box-test/indocker.sh tin2dem-cpu input.xml output.tif
+```
+
+**GPU Image (NVIDIA):**
+Requires NVIDIA Container Toolkit installed on host. The image expects vendor OpenCL ICDs to be provided by the host runtime:
+```console
+black-box-test/indocker.sh --gpu --mount-vendors tin2dem-gpu input.xml output.tif
+```
+
+The `--gpu` flag adds `--gpus all` for NVIDIA GPU access, and `--mount-vendors` mounts the host's `/etc/OpenCL/vendors` directory so the container can discover GPU platforms.
+
+**GPU Image (AMD ROCm):**
+For AMD GPUs, you'll need to manually run with appropriate device access:
+```console
+docker run -it --rm \
+  --device=/dev/kfd --device=/dev/dri --group-add video \
+  -v /opt/rocm:/opt/rocm:ro \
+  -v /etc/OpenCL/vendors:/host-ocl-vendors:ro \
+  -e OCL_ICD_VENDORS=/host-ocl-vendors \
+  -v "$(realpath input.xml)":/var/input.xml \
+  -v "$(pwd)":/var/output/ \
+  tin2dem-gpu \
+  /var/input.xml /var/output/output.tif
+```
+
+### Testing
+
+Run black-box tests:
+```console
+make docker-test-cpu    # Test CPU image
+make docker-test-gpu    # Test GPU image (requires GPU runtime)
+```
+
+### Diagnostics
+
+Both images include `clinfo` for OpenCL diagnostics. To check available platforms:
+```console
+docker run --rm -it tin2dem-cpu clinfo
+docker run --rm -it --gpus all \
+  -v /etc/OpenCL/vendors:/host-ocl-vendors:ro \
+  -e OCL_ICD_VENDORS=/host-ocl-vendors \
+  tin2dem-gpu clinfo
+```
