@@ -39,6 +39,12 @@ cp /path/to/test/files/*.xml input/
 
 ### Step 2: Generate Expected Results
 
+Clean all generated date:
+
+```bash
+make clean-all
+```
+
 Run your **known-good converter** to generate baseline results:
 
 ```bash
@@ -48,8 +54,8 @@ make expected CMD="tin2dem"
 Or with Docker:
 
 ```bash
-make expected CMD="docker run --rm -v $(pwd):/data converter tin2dem"
-```
+make expected CMD="./indocker.sh lekkks/tin2dem:0.3.1-docker1-cpu"
+ ```
 
 This will:
 - Process all `*.xml` files in `input/`
