@@ -1,4 +1,4 @@
-.PHONY: help test docker-build-cpu docker-build-gpu docker-bb-test-cpu docker-bb-test-gpu docker-test-cpu docker-test-gpu docker-push-cpu docker-push-gpu docker-push
+.PHONY: help lint test docker-build-cpu docker-build-gpu docker-bb-test-cpu docker-bb-test-gpu docker-test-cpu docker-test-gpu docker-push-cpu docker-push-gpu docker-push
 
 # Configurable variables
 DOCKERHUB_REPO ?= lekkks/tin2dem
@@ -32,6 +32,7 @@ help:
 	@echo "  docker-push-cpu - Push CPU image to Docker Hub with all tags"
 	@echo "  docker-push-gpu - Push GPU image to Docker Hub with all tags"
 	@echo "  docker-push - Push both CPU and GPU images"
+	@echo "  lint            - Run flake8 linter on Python code"
 	@echo "  test            - Run local pytest suite"
 	@echo ""
 	@echo "Variables:"
@@ -46,6 +47,9 @@ help:
 	@echo "  Dockerfile GPU version: $(DOCKERFILE_VERSION_GPU)"
 	@echo "  CPU tags: $(IMAGE_TAG_CPU_FULL) $(IMAGE_TAG_CPU_LATEST)"
 	@echo "  GPU tags: $(IMAGE_TAG_GPU_FULL) $(IMAGE_TAG_GPU_LATEST)"
+
+lint:
+	python3 -m flake8 tin2dem tests tools
 
 test:
 	python3 -m pytest tests -vv --tb=short --durations=10
