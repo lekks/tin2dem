@@ -1,6 +1,49 @@
 # tin2dem
 Tool for fast rendering of TIN (Triangular Irregular Networks) surface in LandXML format into DEM (Digital Elevation Model) raster files in GeoTIFF format using OpenCL on CPU or GPU
 
+
+# Running in Docker
+
+Two Docker images are available: CPU (with POCL) and GPU (vendor-agnostic, requires host GPU runtime).
+
+### Using Pre-built Images
+
+You can use pre-built images from Docker Hub without building them locally.
+
+#### CPU Image
+
+```console
+docker run --rm -v "$(pwd)":/data lekkks/tin2dem:latest-cpu /data/input.xml /data/output.tif
+```
+
+#### GPU Image
+
+To use GPU acceleration, you need to configure Docker to access GPU devices. For setup instructions, see:
+
+- [NVIDIA GPUs](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)
+- [AMD GPUs](https://docs.docker.com/engine/reference/commandline/dockerd/#gpu-options)
+
+```console
+# For NVIDIA GPUs
+docker run --rm --gpus all -v /etc/OpenCL/vendors:/host-ocl-vendors:ro -e OCL_ICD_VENDORS=/host-ocl-vendors -v "$(pwd)":/data lekkks/tin2dem:latest-gpu /data/input.xml /data/output.tif
+```
+
+For AMD GPUs, you'll need to manually run with appropriate device access (NOT TESTED):
+
+```console
+docker run --rm --device=/dev/kfd --device=/dev/dri --group-add video -v /opt/rocm:/opt/rocm:ro -v /etc/OpenCL/vendors:/host-ocl-vendors:ro -e OCL_ICD_VENDORS=/host-ocl-vendors -v "$(pwd)":/data lekkks/tin2dem:latest-gpu /data/input.xml /data/output.tif
+```
+### Diagnostics
+
+Both images include `clinfo` for OpenCL diagnostics. To check available platforms:
+```console
+docker run --rm -it --entrypoint clinfo lekkks/tin2dem:latest-cpu
+docker run --rm -it --gpus all \
+  -v /etc/OpenCL/vendors:/host-ocl-vendors:ro \
+  -e OCL_ICD_VENDORS=/host-ocl-vendors \
+  --entrypoint clinfo lekkks/tin2dem:latest-gpu
+```
+
 # Installation
 
 ## Requirements
@@ -11,11 +54,10 @@ Tool for fast rendering of TIN (Triangular Irregular Networks) surface in LandXM
 ## Linux
 ### Install dependencies
 ```console
-  sudo add-apt-repository ppa:ubuntugis/ppa
-  sudo apt-get update
-  sudo apt-get install python3-pip gdal-bin gdal-data python3-gdal clinfo
+sudo add-apt-repository ppa:ubuntugis/ppa
+sudo apt-get update
+sudo apt-get install python3-pip gdal-bin gdal-data python3-gdal clinfo
 ``` 
-
 
 ### Install OpenCL driver 
 Here is the list of OpenCL implementations: https://www.iwocl.org/resources/opencl-implementations/  
@@ -30,18 +72,21 @@ Check if you have runtime installed
 clinfo -l
 ```
 
-install package using pip
+## Windows
+
+Install Python 3, GDAL (e.g., via conda: `conda install -c conda-forge gdal`), and OpenCL runtime (GPU drivers or POCL).
+
+## Install package using pip
 
 ```console
-pip3 install git+ssh://git@github.com/lekks/tin2dem
+pip install git+ssh://git@github.com/lekks/tin2dem
 ```
 
 or checkout from git and run test
 ```console
-sudo apt-get install python3-pytest
-py.test-3 tests
+pip install pytest
+pytest tests
 ```
-## Windows
 
 # Usage
 ```
@@ -58,12 +103,12 @@ optional arguments:
   --pixel PIXEL      Pixel size
   --epsg EPSG        EPSG code
   --chunk CHUNK      Processing chunk size, optimal value may depend of your
-                     GPU memory.Default is 256
+                     GPU memory. Default is 256
   --margins MARGINS  Output DEM margins
   --surface SURFACE  Surface to render if multiple surfaces is found
   -a, --autocad      Autocad compatible output (shift on 1/2 pixels)
 ```
-set PYOPENCL_CTX environment variable if you don't want choose runtime every time,
+set PYOPENCL_CTX environment variable if you don't want to choose runtime every time,
 for example:
 ``` 
 PYOPENCL_CTX=0 tin2dem tin.xml dem.tif
@@ -80,66 +125,3 @@ wget http://landxml.org/schema/LandXML-1.1/samples/BLUERIDGE%20Analytics/siteops
 tin2dem siteops.xml siteops.tif --surface=4
 ```
 
-## Docker
-
-Two Docker images are available: CPU (with POCL) and GPU (vendor-agnostic, requires host GPU runtime).
-
-### Building Images
-
-**CPU Image (POCL - works everywhere):**
-```console
-make docker-build-cpu
-```
-
-**GPU Image (requires NVIDIA/AMD runtime on host):**
-```console
-make docker-build-gpu
-```
-
-### Running with Docker
-
-**CPU Image:**
-```console
-black-box-test/indocker.sh tin2dem-cpu input.xml output.tif
-```
-
-**GPU Image (NVIDIA):**
-Requires NVIDIA Container Toolkit installed on host. The image expects vendor OpenCL ICDs to be provided by the host runtime:
-```console
-black-box-test/indocker.sh --gpu --mount-vendors tin2dem-gpu input.xml output.tif
-```
-
-The `--gpu` flag adds `--gpus all` for NVIDIA GPU access, and `--mount-vendors` mounts the host's `/etc/OpenCL/vendors` directory so the container can discover GPU platforms.
-
-**GPU Image (AMD ROCm):**
-For AMD GPUs, you'll need to manually run with appropriate device access:
-```console
-docker run -it --rm \
-  --device=/dev/kfd --device=/dev/dri --group-add video \
-  -v /opt/rocm:/opt/rocm:ro \
-  -v /etc/OpenCL/vendors:/host-ocl-vendors:ro \
-  -e OCL_ICD_VENDORS=/host-ocl-vendors \
-  -v "$(realpath input.xml)":/var/input.xml \
-  -v "$(pwd)":/var/output/ \
-  tin2dem-gpu \
-  /var/input.xml /var/output/output.tif
-```
-
-### Testing
-
-Run black-box tests:
-```console
-make docker-test-cpu    # Test CPU image
-make docker-test-gpu    # Test GPU image (requires GPU runtime)
-```
-
-### Diagnostics
-
-Both images include `clinfo` for OpenCL diagnostics. To check available platforms:
-```console
-docker run --rm -it tin2dem-cpu clinfo
-docker run --rm -it --gpus all \
-  -v /etc/OpenCL/vendors:/host-ocl-vendors:ro \
-  -e OCL_ICD_VENDORS=/host-ocl-vendors \
-  tin2dem-gpu clinfo
-```

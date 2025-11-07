@@ -50,6 +50,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         python3-gdal \
         ocl-icd-libopencl1 \
         pocl-opencl-icd \
+        clinfo \
         tzdata \
     && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /opt/wheels /opt/wheels
