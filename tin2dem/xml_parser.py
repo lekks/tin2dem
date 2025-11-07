@@ -2,7 +2,7 @@ import logging
 import re
 import xml.etree.ElementTree as etree
 
-NS_TAG = re.compile("{http://www\.landxml\.org/schema/LandXML-\d\.\d}(\w+)")
+NS_TAG = re.compile(r"{http://www\.landxml\.org/schema/LandXML-\d\.\d}(\w+)")
 
 log = logging.getLogger("TIN XML parser")
 

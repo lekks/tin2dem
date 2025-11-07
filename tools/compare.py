@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-import json
 import os
 import shutil
 import subprocess
@@ -43,6 +42,7 @@ def log(log_line):
     if (LOG_ENABLED):
         print(log_line)
 
+
 def cmd(args):
     log("$" + ' '.join(args))
     subprocess.check_call(args)
@@ -64,29 +64,29 @@ def resize_as(src_name, dst_name, templ_name, method="average"):
     gdal.Translate(dst_name, src_name, format='GTiff', width=w, height=h, projWin=[ulx, uly, lrx, lry],
                    resampleAlg=method, creationOptions=co)
 
+
 def gdal_calc(A, B, dst_name, expression):
     opt = CREATION_OPTIONS2 + ['-A', A, '--NoDataValue=-32768']
     if B:
         opt += ['-B', B]
     opt += ['--calc', expression, '--outfile=' + dst_name]
-    cmd(['gdal_calc.py']+opt)
+    cmd(['gdal_calc.py'] + opt)
 
 
-def main(first,second,result, tmp_file = None):
-    tmp_dir = os.path.join(TMP_PATH,"compare-tmp-"+str(uuid.uuid1())) #tmp_dir = TMP_PATH
+def main(first, second, result, tmp_file=None):
+    tmp_dir = os.path.join(TMP_PATH, "compare-tmp-" + str(uuid.uuid1()))  # tmp_dir = TMP_PATH
 
     if not os.path.exists(tmp_dir):
         os.makedirs(tmp_dir)
 
     try:
         if tmp_file is None:
-            tmp_file = os.path.join(tmp_dir,"target_resize.tif")
+            tmp_file = os.path.join(tmp_dir, "target_resize.tif")
         resize_as(
             second,
             tmp_file,
             first
         )
-        #tmp_file = second
         gdal_calc(
             first,
             tmp_file,

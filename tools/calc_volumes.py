@@ -9,6 +9,7 @@ import numpy
 METERS3_IN_YARDS3 = 0.764555
 ELEVATION_LIMIT_M = 10000
 
+
 def _get_dem_info(dem):
     info = gdal.Info(dem, format='json')
     pixel_width = info["geoTransform"][1]
@@ -26,7 +27,8 @@ def _resize_first_to_second(src_name, templ_dem):
     ulx, uly = upper_left
     lrx, lry = lower_right
 
-    resized = gdal.Translate('', src_name, format='MEM', width=w, height=h, projWin=[ulx, uly, lrx, lry], resampleAlg="average")
+    resized = gdal.Translate('', src_name, format='MEM', width=w, height=h, projWin=[ulx, uly, lrx, lry],
+                             resampleAlg="average")
     return resized
 
 
@@ -45,7 +47,6 @@ def _read_dem_data_n_nod(dem):
     data[data < -ELEVATION_LIMIT_M] = nod
 
     return data, nod
-
 
 
 def create_dem_from(template, data):
@@ -81,10 +82,10 @@ def _calc_volumes(A, B):
         volume_m3 = pix_area * height
         return volume_m3
 
-    def make_diff(A,B):
+    def make_diff(A, B):
         arrA, nodA = _read_dem_data_n_nod(A)
         arrB, nodB = _read_dem_data_n_nod(B)
-        return (arrA - arrB)* (arrA != nodA)*(arrB != nodB)
+        return (arrA - arrB) * (arrA != nodA) * (arrB != nodB)
 
     diff = make_diff(A, B)
     info = gdal.Info(A, format='json')
@@ -92,8 +93,8 @@ def _calc_volumes(A, B):
     gt = A.GetGeoTransform()
     pix_area = abs(gt[1] * gt[5]) * numpy.math.pow(numpy.cos(numpy.radians(lat)), 2)
 
-    cut_vol = diff_vol(diff * (diff>=0), pix_area)
-    filArr = (-diff) * (diff<=0)
+    cut_vol = diff_vol(diff * (diff >= 0), pix_area)
+    filArr = (-diff) * (diff <= 0)
     del diff
     fill_vol = diff_vol(filArr, pix_area)
 

@@ -125,7 +125,7 @@ class Render:
             p3 = tuple(points[pnts[2]])[:3]
             eq_coef = equation_plane(p1, p2, p3)
             if eq_coef[2] == 0:
-                log.debug("Orthogonal face {}, points {} at {}".format(i, tuple(pnts)[:3], (p1, p2, p3), eq_coef))
+                log.debug("Orthogonal face {}, points {} at {}".format(i, tuple(pnts)[:3], (p1, p2, p3)))
                 orth_cnt += 1
             else:
                 za, zb, zc = norm_z(eq_coef)

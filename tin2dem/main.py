@@ -1,4 +1,3 @@
-
 import argparse
 import logging
 import time
@@ -70,4 +69,3 @@ def cli():
     args = parser.parse_args()
     tin2dem(args.input_tin, args.output_tiff, args.pixel, args.epsg, args.margins, args.chunk, args.chunk, args.surface,
             args.autocad)
-

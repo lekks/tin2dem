@@ -30,6 +30,7 @@ def test_surface():
     ]
     return vertices, faces
 
+
 @pytest.fixture
 def cad_surface():
     vertices = {
@@ -49,28 +50,27 @@ def cad_surface():
     ]
     return vertices, faces
 
+
 def test_cad_compatible(cad_surface):
     vertices, faces = cad_surface
-    surface = Surface().from_collections(vertices, faces)
-    render = Render(surface)
+    Surface().from_collections(vertices, faces)
     # TODO check result is same as cad result
-
-
 
 
 def test_filter(test_surface):
     vertices, faces = test_surface
 
-    bounds = [3, 8, -2, 3] #wesn
+    bounds = [3, 8, -2, 3]  # wesn
 
     expected = [0, 1, 2, 3, 5]
 
     surface = Surface().from_collections(vertices, faces)
     dem = DemInfo.from_envelope(*bounds, pix_size=1)
-    render = Render(surface)
-    result = render._select_filtered(render.filter_bounds(dem))
+    render_instance = Render(surface)
+    result = render_instance._select_filtered(render_instance.filter_bounds(dem))
 
     assert list(result) == expected
+
 
 def test_choose_face(test_surface):
     vertices, faces = test_surface
