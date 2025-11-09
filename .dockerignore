@@ -1,0 +1,36 @@
+ .git
+ .git/**/*
+ venv
+ venv/**/*
+ __pycache__
+ **/__pycache__/**
+ *.pyc
+ *.pyo
+ *.pyd
+ *.swp
+ *.swo
+ *.DS_Store
+ 
+ # Tests and large data not needed for building the wheel
+ black-box-test/output
+ black-box-test/input
+ black-box-test/**/output/**
+ black-box-test/**/input/**
+ 
+ # Caches
+ .pytest_cache
+ .pytest_cache/**
+ 
+ # Editor/project files
+ *.log
+ *.tmp
+ .dockerignore
+ 
+ # Build artifacts
+ build
+ build/**
+ dist
+ dist/**
+ *.egg-info
+ *.egg-info/**
+

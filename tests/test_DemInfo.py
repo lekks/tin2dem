@@ -48,9 +48,9 @@ def test_split_dem():
                    [151, 1, 0, 137, 0, -1],
                    [151, 1, 0, 116, 0, -1]]
     for i, chunk in enumerate(chunks):
-        # print("{}-{},{}-{}:{}".format(chunk.offset_col, chunk.offset_col + chunk.width - 1, chunk.offset_row, chunk.offset_row + chunk.height - 1, chunk.gt))
+        # print("{}-{},{}-{}:{}".format(chunk.offset_col, chunk.offset_col + chunk.width - 1,
+        #                               chunk.offset_row, chunk.offset_row + chunk.height - 1, chunk.gt))
         assert chunk.pixel_coord(1, 1) == dem.pixel_coord(chunk.offset_col + 1, chunk.offset_row + 1)
-        assert chunk.offset_col+chunk.width < 200
-        assert chunk.offset_row+chunk.height < 200
+        assert chunk.offset_col + chunk.width < 200
+        assert chunk.offset_row + chunk.height < 200
         assert chunk.gt == expected_gt[i]
-

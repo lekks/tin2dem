@@ -22,7 +22,7 @@ class DemInfo:
         assert width > 0
         assert height > 0
         gt = [west, pix_size, 0, north, 0, -pix_size]
-        return DemInfo(gt,width, height)
+        return DemInfo(gt, width, height)
 
     def index_on_pos(self, x, y):
         '''
