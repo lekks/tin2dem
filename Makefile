@@ -49,7 +49,7 @@ help:
 	@echo "  GPU tags: $(IMAGE_TAG_GPU_FULL) $(IMAGE_TAG_GPU_LATEST)"
 
 lint:
-	python3 -m flake8 tin2dem tests tools
+	python3 -m flake8 tin2dem tests
 
 test:
 	python3 -m pytest tests -vv --tb=short --durations=10

@@ -4,17 +4,18 @@
 
 # Function to display usage information
 usage() {
-    echo "Usage: $0 [--gpu] [--mount-vendors] <docker_tag> <input_file> <output_file>"
+    echo "Usage: $0 [--gpu] [--mount-vendors] <docker_tag> <input_file> <output_file> [extra_args...]"
     echo ""
     echo "  --gpu            Add NVIDIA GPU flags (equiv to: --gpus all)."
     echo "  --mount-vendors  Bind-mount host /etc/OpenCL/vendors to /host-ocl-vendors and include in OCL_ICD_VENDORS."
     echo "  <docker_tag>     The Docker image tag to use (e.g., tin2dem-gpu:latest)."
     echo "  <input_file>     Path to the input XML file."
     echo "  <output_file>    Name of the output file to be created in the current directory."
+    echo "  [extra_args...]  Optional additional arguments to pass to the tin2dem tool."
     echo ""
     echo "Examples:"
     echo "  $0 tin2dem-cpu:latest path/to/input.xml output.dem"
-    echo "  $0 --gpu --mount-vendors tin2dem-gpu:latest path/to/input.xml output.dem"
+    echo "  $0 --gpu --mount-vendors tin2dem-gpu:latest path/to/input.xml output.dem --verbose"
     exit 1
 }
 
@@ -42,7 +43,7 @@ while [[ "$1" == --* ]]; do
 done
 
 # Check if the correct number of arguments is provided after flags
-if [ "$#" -ne 3 ]; then
+if [ "$#" -lt 3 ]; then
     usage
 fi
 
@@ -50,6 +51,8 @@ fi
 DOCKER_TAG=$1
 INPUT_FILE=$2
 OUTPUT_FILE=$3
+shift 3
+EXTRA_ARGS="$@"
 
 # Check if the input file exists
 if [ ! -f "$INPUT_FILE" ]; then
@@ -67,4 +70,4 @@ docker run -it --rm \
     -v "$(pwd)":/var/output/ \
     "${EXTRA_VOLUMES[@]}" \
     "$DOCKER_TAG" \
-    /var/input.xml /var/output/"$OUTPUT_FILE"
+    /var/input.xml /var/output/"$OUTPUT_FILE" $EXTRA_ARGS

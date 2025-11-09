@@ -8,6 +8,9 @@
 # Default conversion command
 CMD ?= tin2dem
 
+# Extra arguments to pass to the conversion command
+EXTRA_ARGS ?=
+
 # Comparison thresholds (0 = no limit)
 MAX_DIFF ?= 0.0
 MAX_STD ?= 0.0
@@ -40,6 +43,7 @@ help:
 	@echo ""
 	@echo "Parameters:"
 	@echo "  CMD=<command>                - Conversion command (default: tin2dem)"
+	@echo "  EXTRA_ARGS=<args>            - Extra arguments to pass to CMD (default: empty)"
 	@echo "  MAX_DIFF=<value>             - Max pixel difference threshold (default: 0.0)"
 	@echo "  MAX_STD=<value>              - Max std deviation threshold (default: 0.0)"
 	@echo ""
@@ -47,6 +51,7 @@ help:
 	@echo "  make expected CMD=\"tin2dem\""
 	@echo "  make test CMD=\"./new_converter\""
 	@echo "  make test CMD=\"tin2dem\" MAX_DIFF=0.001 MAX_STD=0.005"
+	@echo "  make expected CMD=\"tin2dem\" EXTRA_ARGS=\"--verbose --debug\""
 
 # Generate expected results
 .PHONY: expected
@@ -56,7 +61,7 @@ expected: $(EXPECTED_TIFS)
 # Pattern rule for generating expected TIF files
 $(EXPECTED_DIR)/%.tif: $(INPUT_DIR)/%.xml
 	@echo "Generating expected: $@"
-	$(CMD) $< $@
+	$(CMD) $< $@ $(EXTRA_ARGS)
 
 # Run tests against expected results
 .PHONY: test
@@ -68,7 +73,7 @@ test: $(OUTPUT_TIFS)
 # Pattern rule for generating output TIF files
 $(OUTPUT_DIR)/%.tif: $(INPUT_DIR)/%.xml
 	@echo "Converting: $< -> $@"
-	$(CMD) $< $@
+	$(CMD) $< $@ $(EXTRA_ARGS)
 
 # Compare all output files against expected
 .PHONY: compare-all

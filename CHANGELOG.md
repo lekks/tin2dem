@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Black box testing suite for comprehensive validation
 - Versioned Docker support with separate CPU and GPU images for better efficiency
 - Root level Makefile
+- Add flake8 linker
 
 ### Changed
 - Updated pyopencl version
@@ -18,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Added missing ENTRYPOINT in Dockerfile
 - Cached OpenCL kernels to avoid repeated retrieval overhead and warnings
+- Fixed flake8 warnings
 
 ## [0.3.0]
 - Initial release

@@ -15,6 +15,13 @@ make expected CMD="tin2dem"
 make test CMD="./new_tin2dem"
 ```
 
+You can also pass extra arguments to the conversion command:
+
+```bash
+make expected CMD="tin2dem" EXTRA_ARGS="-a --pixel 0.5"
+make test CMD="./new_tin2dem" EXTRA_ARGS="--surface 1"
+```
+
 ## Directory Structure
 
 ```
@@ -121,6 +128,18 @@ MAX_DIFF ?= 0.001
 MAX_STD ?= 0.005
 ```
 
+### Extra Arguments
+
+Pass additional arguments to the conversion command:
+
+```bash
+make expected CMD="tin2dem" EXTRA_ARGS="-a --pixel 0.5"
+make test CMD="./new_converter" EXTRA_ARGS="--surface 1 --chunk 512"
+```
+
+- `EXTRA_ARGS` - Additional command-line arguments (default: empty)
+- Useful for testing different options or configurations
+
 ### Docker Example
 
 ```bash
@@ -156,10 +175,12 @@ Generate baseline/expected results from input XML files.
 
 **Parameters:**
 - `CMD` - Conversion command (required for first run, default: `tin2dem`)
+- `EXTRA_ARGS` - Extra arguments to pass to CMD (default: empty)
 
 **Example:**
 ```bash
 make expected CMD="tin2dem"
+make expected CMD="tin2dem" EXTRA_ARGS="-a --pixel 0.5"
 ```
 
 ### `make test`
@@ -168,12 +189,14 @@ Test a converter implementation against expected results.
 
 **Parameters:**
 - `CMD` - Conversion command (default: `tin2dem`)
+- `EXTRA_ARGS` - Extra arguments to pass to CMD (default: empty)
 - `MAX_DIFF` - Max pixel difference threshold (default: `0.0`)
 - `MAX_STD` - Max standard deviation threshold (default: `0.0`)
 
 **Example:**
 ```bash
 make test CMD="./new_converter" MAX_DIFF=0.001 MAX_STD=0.005
+make test CMD="./new_converter" EXTRA_ARGS="--surface 1" MAX_DIFF=0.001
 ```
 
 ### `make clean`
@@ -280,51 +303,3 @@ When tests fail, examine the statistics:
 - Include edge cases (empty files, maximum sizes, special features)
 - Document what each test file is testing
 
-## Troubleshooting
-
-### "No such file or directory" errors
-
-Ensure your conversion command includes correct input/output parameters:
-
-```bash
-# Wrong - command doesn't know where to read/write
-make expected CMD="converter"
-
-# Right - Makefile passes input and output paths
-make expected CMD="converter"  # assumes converter reads $1 and writes $2
-```
-
-### "Dimension mismatch" errors
-
-Your converter may be producing different size outputs. Check:
-- Input file validity
-- Converter configuration
-- Coordinate system handling
-
-### Slow comparisons
-
-For very large files:
-- The line-by-line reading is already optimized
-- Consider testing on downsampled versions first
-- Use faster storage (SSD vs HDD)
-
-### All pixels different
-
-This often means:
-- Wrong file format or encoding
-- Endianness issues
-- Coordinate system differences
-- Complete implementation error
-
-Check one file manually to diagnose.
-
-## Requirements
-
-- **Python 3.6+**
-- **GDAL Python bindings** (`pip install gdal` or `conda install gdal`)
-- **Make** (GNU Make)
-- Your conversion tool/command
-
-## License
-
-This testing framework is provided as-is for your use.
