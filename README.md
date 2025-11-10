@@ -4,7 +4,7 @@ Tool for fast rendering of TIN (Triangular Irregular Networks) surface in LandXM
 
 # Running in Docker
 
-Two Docker images are available: CPU (with POCL) and GPU (vendor-agnostic, requires host GPU runtime).
+Two Docker images are [available](https://hub.docker.com/repository/docker/lekkks/tin2dem): CPU (with POCL) and GPU (vendor-agnostic, requires host GPU runtime (not tested for ADM)).
 
 ### Using Pre-built Images
 
@@ -54,9 +54,8 @@ docker run --rm -it --gpus all \
 ## Linux
 ### Install dependencies
 ```console
-sudo add-apt-repository ppa:ubuntugis/ppa
 sudo apt-get update
-sudo apt-get install python3-pip gdal-bin gdal-data python3-gdal clinfo
+sudo apt-get install python3-pip gdal-bin gdal-data python3-gdal ocl-icd-libopencl1 clinfo 
 ``` 
 
 ### Install OpenCL driver 
@@ -65,7 +64,7 @@ Install runtime corresponding to your GPU
 
 You can use universal runtime POCL and run render with CPU:
 ```console
-sudo apt install pocl-opencl-icd
+sudo apt install pocl-opencl-icd 
 ```
 Check if you have runtime installed
 ```console
